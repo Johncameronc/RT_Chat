@@ -147,7 +147,3 @@ Para uma aplicação de chat robusta e prática, a abordagem recomendada é a **
 3.  Criptografe a chave simétrica temporária usando a chave pública RSA do destinatário.
 4.  Envie a [chave simétrica criptografada com RSA] + [mensagem criptografada com a chave simétrica].
 Esta abordagem combina a eficiência da criptografia simétrica para dados longos com a segurança da criptografia assimétrica para a troca de chaves.
-
----
-
-*Este README foi gerado com base nos arquivos de projeto fornecidos. Pode ser necessário ajustar as configurações de porta ou a descrição da comunicação entre clientes se sua configuração diferir das suposições feitas (particularmente em relação às portas de destino fixas).*
