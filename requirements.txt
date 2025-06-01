@@ -1,0 +1,6 @@
+flask==3.0.2
+cryptography==42.0.5
+python-dotenv==1.0.1
+requests==2.31.0
+PyJWT==2.8.0
+flask-socketio==5.3.6
