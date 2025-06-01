@@ -1,5 +1,9 @@
 # Real Time Chat
 
+<div align="center">
+    <img src="./readme-files/funcionamento.gif">
+</div>
+
 Uma aplicação de chat peer-to-peer baseada em Python, com mensagens em tempo real e foco em segurança através de handshake criptográfico, criptografia de mensagens e autenticação de mensagens. Este projeto utiliza Flask e Flask-SocketIO para o servidor web e comunicação WebSocket.
 
 ## Funcionalidades
