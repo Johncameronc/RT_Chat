@@ -1,0 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+:root {
+    --bg-color: #2b2a33; /* Fundo principal escuro */
+    --surface-color: #2d2d2d; /* Cor de superfície (container do chat, inputs) */
+    --primary-text-color: #e0e0e0; /* Cor do texto principal (claro) */
+    --secondary-text-color: #a0a0a0; /* Cor do texto secundário (timestamps) */
+    --border-color: #444444; /* Cor das bordas */
+    --sent-bg: #005C4B; /* Fundo da mensagem enviada (verde escuro/azulado) */
+    --received-bg: #3b3b3b; /* Fundo da mensagem recebida (cinza médio-escuro) */
+    --button-bg: #007bff; /* Fundo do botão (azul) */
+    --button-hover-bg: #0056b3; /* Hover do botão */
+    --input-placeholder-color: #777777;
+    --border-radius-general: 20px; /* Borda arredondada geral */
+    --border-radius-bubbles: 20px; /* Borda arredondada para balões de mensagem */
+    --sender-text-color: #58A6FF; /* Azul para o nome do usuário, como na imagem */
+    --timestamp-size: 0.75em; /* Tamanho do timestamp */
+}
+
+body {
+    font-family: 'Nunito';
+    background: #101010;
+    background: linear-gradient(145deg,rgba(16, 16, 16, 1) 0%, rgba(21, 115, 209, 1) 25%, rgba(21, 115, 209, 1) 75%, rgba(16, 16, 16, 1) 100%);
+    color: var(--primary-text-color);
+
+    
+    margin: 0;
+    /* padding: 20px; */ /* remover padding para evitar scroll da página */
+    display: flex;
+    /* justify-content: center; */ /* centraliza horizontalmente */
+    align-items: center; /* adiciona o alinhamento vertical central */
+    min-height: 100vh; /* garante que o body tenha pelo menos a altura da viewport */
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+}
+
+img {
+    display: block;
+    margin: -20px auto 20px auto;
+    max-width: 120px;
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 800px; /* Largura máxima do chat */
+    /* background-color: #13141500; */
+    /* background-color: #0057b3; */
+    background-color: rgba(45, 45, 45, 0.6); /* fundo semi-transparente */
+    padding: 20px; /* Adiciona padding ao redor de todo o conteúdo do chat */
+    display: flex;
+    flex-direction: column;
+    /* height: 100%; */
+    margin: 0 auto; /* centraliza o contêiner horizontalmente */
+
+    /* background: rgba(196, 196, 196, 0.205); */
+    border-radius: 30px;
+    /* box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); */
+    backdrop-filter: blur(10px); /* efeito de desfoque */
+    -webkit-backdrop-filter: blur(20px); /* para compatibilidade webkit */
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-text-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+#mensagens-buffer {
+    width: 100%;
+    height: 100%;
+
+    margin-bottom: 30px;
+    border-radius: 30px 0 0 0;
+    background-color: transparent;
+    overflow: hidden;
+}
+
+#mensagens {
+    flex-grow: 1;
+    background-color: transparent;
+    padding: 0;
+    padding-right: 10px;
+    margin-bottom: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 500px;
+    min-height: 500px;
+    overflow-y: scroll;
+}
+
+/* Scrollbar styling (opcional, para Webkit browsers) */
+#mensagens::-webkit-scrollbar {
+    width: 3px; /* aumenta a largura do scrollbar */
+    border-radius: 30px;
+}
+#mensagens::-webkit-scrollbar-track {
+    border-radius: var(--border-radius-general);
+}
+#mensagens::-webkit-scrollbar-thumb {
+    background-color: #dddddd; /* muda a cor do "pegador" do scrollbar para branco */
+    border-radius: var(--border-radius-general);
+}
+
+#mensagens::-webkit-scrollbar-thumb:hover {
+    background-color: #c7c7c7; /* mantém a cor branca no hover */
+    border-radius: var(--border-radius-general); /* mantém o border-radius no hover */
+     /* cor um pouco mais escura no hover */
+}
+
+#mensagens::-webkit-scrollbar-thumb:active {
+    background-color: #999999; /* cor no estado ativo (clicado) */
+}
+
+.mensagem {
+    display: flex;
+    flex-direction: column; /* Mantém sender acima de message-body */
+    padding: 10px 15px;
+    border-radius: var(--border-radius-bubbles);
+    max-width: 75%;
+    word-wrap: break-word;
+    line-height: 1.4;
+    position: relative; /* Para qualquer posicionamento absoluto futuro se necessário */
+}
+
+.enviada {
+    background-color: #005c4b;
+    color: white; /* Texto branco para bom contraste */
+    align-self: flex-end;
+    border-bottom-right-radius: 6px; /* Pequena "cauda" moderna */
+}
+
+.recebida {
+    background-color: #363636;
+    color: #fff;
+
+    
+    align-self: flex-start;
+    border-bottom-left-radius: 3px; /* Pequena "cauda" moderna */
+}
+
+.sender {
+    font-size: 0.9em; /* Um pouco maior para o nome */
+    font-weight: 600; /* Mais destacado */
+    margin-bottom: 5px; /* Espaço entre o nome e o corpo da mensagem */
+    color: var(--sender-text-color);
+}
+.sender:empty {
+    display: none;
+}
+
+/* NOVO: Layout para o corpo da mensagem (texto + timestamp) usando Flexbox */
+.message-body {
+    display: flex;
+    align-items: flex-end; /* alinha texto e timestamp na base */
+    gap: 6px; /* Espaço entre o final do texto e o início do timestamp */
+    flex-wrap: wrap; /* permite que itens quebrem para a próxima linha se necessário */
+    /* justify-content: flex-start; */ /* alinha conteúdo (texto e timestamp) à esquerda */
+    /* width: 100%; */ /* garantir que ocupe a largura total do contêiner pai */
+}
+
+.text {
+    /* Não precisa de muito aqui, o flexbox cuida do tamanho */
+    word-break: break-word; /* Para quebrar palavras longas se necessário */
+    /* flex-grow: 1; */ /* permite que o texto ocupe o espaço disponível */
+    /* margin-right: auto; */ /* empurra o timestamp para a direita */
+    /* O texto ocupará a primeira coluna do grid */
+}
+
+.timestamp {
+    color: black;
+
+    font-size: var(--timestamp-size);
+    white-space: nowrap; /* Evita que o timestamp quebre em duas linhas */
+    margin-left: auto; /* empurra o timestamp para a direita */
+    /* O timestamp ocupará a segunda coluna do grid */
+    /* Cores já definidas anteriormente, mas podemos reforçar */
+}
+.enviada .timestamp {
+     color: #87b2aa /* Levemente mais visível */
+}
+.recebida .timestamp {
+     color: #a0a0a0
+}
+
+
+#formulario {
+    display: flex;
+    gap: 10px;
+}
+
+#mensagem { /* Input de mensagem */
+    flex-grow: 1;
+    padding: 12px 15px;
+    /* border: 1px solid var(--border-color); */ /* remova a borda se preferir */
+    /* background-color: var(--bg-color); */ /* remova o background anterior */
+    background-color: rgba(35, 35, 35, 0.4); /* fundo semi-transparente */
+    color: var(--primary-text-color);
+    border-radius: 30px;
+    font-size: 1em;
+    backdrop-filter: blur(20px); /* efeito de desfoque */
+    -webkit-backdrop-filter: blur(20px); /* para compatibilidade webkit */
+
+    border: none;
+}
+#mensagem::placeholder {
+    color: #fff;
+    font-family: 'Nunito';
+}
+#mensagem:focus {
+    outline: 1px solid #1573d1; /* remove a borda de foco padrão */
+    /* border-color: var(--button-bg); */ /* remova a borda se preferir */
+    box-shadow: none; /* remove a sombra de foco */
+}
+
+/* estilo para quando o input de mensagem não estiver vazio */
+#mensagem:not(:placeholder-shown) {
+    font-family: 'Nunito'; /* mude para a fonte desejada */
+}
+
+button[type="submit"] { /* Botão de enviar */
+    /* padding: 10px; */ /* remove o padding, o tamanho será definido por width/height */
+    width: 44px; /* define largura para o círculo */
+    height: 44px; /* define altura para o círculo */
+    background-color: #005c4b;
+    /* color: white; */ /* a cor do ícone svg é definida no fill do svg */
+    border: none;
+    border-radius: 50%; /* transforma o botão em círculo */
+    cursor: pointer;
+    /* font-size: 1em; */ /* não se aplica ao ícone svg */
+    transition: background-color 0.2s ease;
+    display: flex; /* usa flexbox para centralizar o ícone */
+    justify-content: center; /* centraliza horizontalmente */
+    align-items: center; /* centraliza verticalmente */
+}
+
+button[type="submit"]:hover {
+    background-color: var(--button-hover-bg);
+}
+
+button[type="submit"] svg {
+    transform: translateX(2px); /* ajusta a posição horizontal do ícone */
+}
+
+/* Animação para novas mensagens */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.new-message-animation {
+    animation: fadeInSlideUp 0.3s ease-out forwards;
+} 

@@ -25,7 +25,7 @@ class MessageRoutes:
             'timestamp': datetime.now().strftime('%H:%M')
         })
         
-        target_url = 'http://127.0.0.1:5001/send_message'
+        target_url = 'http://127.0.0.1:5001/receive_message'
 
         try:
             response = requests.post(

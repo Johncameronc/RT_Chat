@@ -37,11 +37,11 @@ def handle_connect():
 def handshake():
     return handshake_routes.handle_handshake()
 
-@app.route('/enviar_mensagem', methods=['POST'])
-def enviar_mensagem():
+@app.route('/send_message', methods=['POST'])
+def send_message():
     return message_routes.send_message()
 
-@app.route('/send_message', methods=['POST'])
+@app.route('/receive_message', methods=['POST'])
 def receive_message():
     return message_routes.receive_message()
 
