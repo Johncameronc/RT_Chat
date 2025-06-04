@@ -1,7 +1,6 @@
 from flask import jsonify, request
 import time
 import requests
-import base64
 from ..config import MAX_HANDSHAKE_ATTEMPTS, HANDSHAKE_RETRY_DELAY
 
 class HandshakeRoutes:
@@ -21,14 +20,11 @@ class HandshakeRoutes:
                 print(f"tentativa {tentativa + 1} de handshake...")
                 # garante que a chave pública está em formato pem
                 public_key = self.crypto.get_public_key_bytes()
-                # garante que a chave compartilhada está em base64
-                shared_key = base64.b64encode(self.crypto.shared_key).decode('utf-8')
                 
                 response = requests.post(
                     'http://127.0.0.1:5001/handshake',
                     json={
-                        'public_key': public_key,
-                        'shared_key': shared_key
+                        'public_key': public_key
                     }
                 )
                 
@@ -36,8 +32,6 @@ class HandshakeRoutes:
                     dados = response.json()
                     # decodifica a chave pública recebida
                     self.crypto.set_other_public_key(dados['public_key'])
-                    # decodifica a chave compartilhada recebida
-                    self.crypto.set_shared_key(base64.b64decode(dados['shared_key']))
                     print("handshake realizado com sucesso!")
                     self.crypto.handshake_done = True
                     return
@@ -56,19 +50,16 @@ class HandshakeRoutes:
     def handle_handshake(self):
         dados = request.get_json()
         
-        if not dados or 'public_key' not in dados or 'shared_key' not in dados:
+        if not dados or 'public_key' not in dados:
             return jsonify({'erro': 'dados incompletos'}), 400
             
         try:
             # decodifica a chave pública recebida
             self.crypto.set_other_public_key(dados['public_key'])
-            # decodifica a chave compartilhada recebida
-            self.crypto.set_shared_key(base64.b64decode(dados['shared_key']))
             
-            # envia a resposta com as chaves codificadas corretamente
+            # envia a resposta com a chave pública codificada
             return jsonify({
-                'public_key': self.crypto.get_public_key_bytes(),
-                'shared_key': base64.b64encode(self.crypto.shared_key).decode('utf-8')
+                'public_key': self.crypto.get_public_key_bytes()
             })
         except Exception as e:
             print(f"erro no handle_handshake: {str(e)}")

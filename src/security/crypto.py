@@ -1,16 +1,13 @@
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
-import hmac
-import hashlib
 import base64
 import os
-from ..config import KEY_SIZE, PUBLIC_EXPONENT, SHARED_KEY_SIZE
+from ..config import KEY_SIZE, PUBLIC_EXPONENT
 
 class CryptoManager:
     def __init__(self):
         self.private_key = None
         self.other_public_key = None
-        self.shared_key = None
         self.handshake_done = False
 
     def generate_keys(self):
@@ -18,7 +15,6 @@ class CryptoManager:
             public_exponent=PUBLIC_EXPONENT,
             key_size=KEY_SIZE
         )
-        self.shared_key = os.urandom(SHARED_KEY_SIZE)
 
     def encrypt_message(self, message):
         try:
@@ -54,6 +50,40 @@ class CryptoManager:
             print(f"erro ao descriptografar mensagem: {str(e)}")
             raise
 
+    def sign_message(self, message):
+        try:
+            # cria assinatura digital usando a chave privada
+            signature = self.private_key.sign(
+                message.encode(),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return base64.b64encode(signature).decode('utf-8')
+        except Exception as e:
+            print(f"erro ao assinar mensagem: {str(e)}")
+            raise
+
+    def verify_signature(self, message, signature):
+        try:
+            # verifica a assinatura usando a chave pública do remetente
+            signature_bytes = base64.b64decode(signature)
+            self.other_public_key.verify(
+                signature_bytes,
+                message.encode(),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return True
+        except Exception as e:
+            print(f"erro ao verificar assinatura: {str(e)}")
+            return False
+
     def get_public_key_bytes(self):
         try:
             return self.private_key.public_key().public_bytes(
@@ -64,14 +94,6 @@ class CryptoManager:
             print(f"erro ao obter chave pública: {str(e)}")
             raise
 
-    def create_mac(self, message):
-        mac = hmac.new(self.shared_key, message.encode(), hashlib.sha256)
-        return base64.b64encode(mac.digest()).decode('utf-8')
-
-    def verify_mac(self, message, received_mac):
-        calculated_mac = self.create_mac(message)
-        return hmac.compare_digest(calculated_mac, received_mac)
-
     def set_other_public_key(self, public_key_bytes):
         try:
             if isinstance(public_key_bytes, str):
@@ -79,13 +101,4 @@ class CryptoManager:
             self.other_public_key = serialization.load_pem_public_key(public_key_bytes)
         except Exception as e:
             print(f"erro ao definir chave pública: {str(e)}")
-            raise
-
-    def set_shared_key(self, shared_key_bytes):
-        try:
-            if isinstance(shared_key_bytes, str):
-                shared_key_bytes = base64.b64decode(shared_key_bytes)
-            self.shared_key = shared_key_bytes
-        except Exception as e:
-            print(f"erro ao definir chave compartilhada: {str(e)}")
             raise 

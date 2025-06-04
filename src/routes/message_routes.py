@@ -15,7 +15,8 @@ class MessageRoutes:
         
         # criptografa a mensagem usando RSA
         mensagem_criptografada = self.crypto.encrypt_message(mensagem)
-        mac = self.crypto.create_mac(mensagem)
+        # cria assinatura digital da mensagem
+        assinatura = self.crypto.sign_message(mensagem)
         
         # emite para o frontend do remetente (mensagem original)
         self.socketio.emit('mensagem', {
@@ -32,7 +33,7 @@ class MessageRoutes:
                 target_url,
                 json={
                     'mensagem': mensagem_criptografada,  # envia mensagem criptografada
-                    'mac': mac,
+                    'assinatura': assinatura,  # envia assinatura digital
                     'usuario': self.usuario
                 },
                 timeout=REQUEST_TIMEOUT
@@ -56,15 +57,16 @@ class MessageRoutes:
     def receive_message(self):
         dados = request.get_json()
         mensagem_criptografada = dados['mensagem']
-        mac_recebido = dados['mac']
+        assinatura = dados['assinatura']
         usuario = dados.get('usuario', 'anônimo')
 
         try:
             # descriptografa a mensagem usando RSA
             mensagem = self.crypto.decrypt_message(mensagem_criptografada)
             
-            if not self.crypto.verify_mac(mensagem, mac_recebido):
-                print("erro: mac inválido recebido.")
+            # verifica a assinatura digital
+            if not self.crypto.verify_signature(mensagem, assinatura):
+                print("erro: assinatura inválida recebida.")
                 return jsonify({'erro': 'mensagem inválida'}), 400
 
             self.socketio.emit('mensagem', {

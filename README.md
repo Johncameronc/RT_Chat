@@ -11,10 +11,10 @@ Uma aplicação de chat peer-to-peer baseada em Python, com mensagens em tempo r
 * **Mensagens em Tempo Real:** Troca instantânea de mensagens entre dois clientes conectados usando WebSockets (Flask-SocketIO).
 * **Comunicação tipo P2P:** Projetado para comunicação direta entre duas instâncias da aplicação.
 * **Identificação de Usuário:** Usuários podem especificar um nome de usuário via argumento de linha de comando.
-* **Handshake Seguro:** Utiliza criptografia assimétrica RSA para a troca inicial de uma chave secreta compartilhada.
+* **Handshake Seguro:** Utiliza criptografia assimétrica RSA para a troca inicial de chaves públicas.
 * **Criptografia de Mensagens (Confidencialidade):** As mensagens são criptografadas usando RSA com a chave pública do destinatário antes da transmissão.
-* **Autenticação de Mensagens (Integridade e Autenticidade):** Emprega HMAC-SHA256 para garantir a integridade e autenticidade da mensagem original (texto plano) usando a chave secreta compartilhada.
-* **Geração Dinâmica de Chaves:** Pares de chaves RSA e chaves compartilhadas são gerados em memória para cada sessão.
+* **Autenticação de Mensagens (Integridade e Autenticidade):** Emprega assinatura digital RSA para garantir a integridade e autenticidade da mensagem.
+* **Geração Dinâmica de Chaves:** Pares de chaves RSA são gerados em memória para cada sessão.
 * **Interface Web Moderna:** Uma interface de usuário simples e limpa para o chat (detalhes em `templates/index.html`).
 
 ## Estrutura do Projeto
@@ -29,11 +29,16 @@ Uma aplicação de chat peer-to-peer baseada em Python, com mensagens em tempo r
 │   │   └── message_routes.py   # Gerencia o envio e recebimento de mensagens
 │   └── config.py               # Configuração (portas, parâmetros cripto)
 ├── client.py                   # Aplicação Flask principal, manipulação de WebSocket
-├── keys_manager.py             # Script utilitário para gerar e salvar chaves RSA
 ├── requirements.txt            # Dependências Python
-├── templates/
-│   └── index.html              # Template HTML para a interface do chat
-└── .env                        # Armazena chaves se geradas pelo keys_manager.py
+├── static                      # Arquivos de importação do index.html
+│   ├── css/
+│   │   └── styles.css
+│   ├── img/
+│   │   └── logo.png
+│   └── script/
+│       └── script.js
+└── templates/
+    └── index.html              # Template HTML para a interface do chat
 ```
 
 ## Pré-requisitos
@@ -135,11 +140,12 @@ Esta aplicação é projetada para que duas instâncias se comuniquem.
 
 ## Aspectos de Segurança
 
-* **Troca de Chaves RSA:** Criptografia assimétrica (RSA) é usada durante o handshake inicial para estabelecer de forma segura uma chave secreta compartilhada entre os dois clientes.
+* **Troca de Chaves RSA:** Criptografia assimétrica (RSA) é usada durante o handshake inicial para trocar as chaves públicas entre os dois clientes.
 * **Criptografia de Mensagens (Confidencialidade):** As mensagens são criptografadas usando a chave pública RSA do destinatário (com padding OAEP) antes de serem transmitidas. Isso garante que apenas o destinatário com a chave privada correspondente possa ler o conteúdo da mensagem.
-* **HMAC (Hash-based Message Authentication Code):** A chave secreta compartilhada é então usada com HMAC-SHA256 para gerar um MAC para cada mensagem original (texto plano). Este MAC é enviado junto com a mensagem criptografada. Ao receber, a mensagem é descriptografada e o MAC é verificado contra o texto plano resultante. Isso garante:
+* **Assinatura Digital RSA:** A chave privada do remetente é usada para criar uma assinatura digital da mensagem. Esta assinatura é enviada junto com a mensagem criptografada. Ao receber, a assinatura é verificada usando a chave pública do remetente. Isso garante:
     * **Integridade:** A mensagem original não foi adulterada durante o trânsito.
-    * **Autenticidade:** A mensagem genuinamente originou-se da outra parte que também conhece a chave secreta compartilhada.
+    * **Autenticidade:** A mensagem genuinamente originou-se da outra parte que possui a chave privada correspondente.
+    * **Não-repúdio:** O remetente não pode negar que enviou a mensagem, pois apenas ele possui a chave privada necessária para criar a assinatura.
 * **Chaves Efêmeras:** Por padrão, as chaves criptográficas são geradas em memória para cada sessão, aumentando a segurança por não depender de chaves armazenadas persistentemente que poderiam ser comprometidas.
 
 **⚠️ Nota Importante sobre Criptografia RSA Direta de Mensagens:**
