@@ -1,7 +1,7 @@
 from flask import jsonify, request
 import time
 import requests
-from ..config import MAX_HANDSHAKE_ATTEMPTS, HANDSHAKE_RETRY_DELAY
+from ..config import MAX_HANDSHAKE_ATTEMPTS, HANDSHAKE_RETRY_DELAY, DESTINATION_PORT
 
 class HandshakeRoutes:
     def __init__(self, crypto_manager):
@@ -18,19 +18,19 @@ class HandshakeRoutes:
         while tentativa < MAX_HANDSHAKE_ATTEMPTS:
             try:
                 print(f"tentativa {tentativa + 1} de handshake...")
-                # garante que a chave pública está em formato pem
-                public_key = self.crypto.get_public_key_bytes()
+                # obtém chave pública e módulo n
+                public_key_data = self.crypto.get_public_key_bytes()
                 
                 response = requests.post(
-                    'http://127.0.0.1:5001/handshake',
+                    f'http://127.0.0.1:{DESTINATION_PORT}/handshake',
                     json={
-                        'public_key': public_key
+                        'public_key': public_key_data
                     }
                 )
                 
                 if response.status_code == 200:
                     dados = response.json()
-                    # decodifica a chave pública recebida
+                    # configura a chave pública e módulo n do outro lado
                     self.crypto.set_other_public_key(dados['public_key'])
                     print("handshake realizado com sucesso!")
                     self.crypto.handshake_done = True
@@ -54,10 +54,10 @@ class HandshakeRoutes:
             return jsonify({'erro': 'dados incompletos'}), 400
             
         try:
-            # decodifica a chave pública recebida
+            # configura a chave pública e módulo n do outro lado
             self.crypto.set_other_public_key(dados['public_key'])
             
-            # envia a resposta com a chave pública codificada
+            # envia a resposta com a chave pública e módulo n
             return jsonify({
                 'public_key': self.crypto.get_public_key_bytes()
             })

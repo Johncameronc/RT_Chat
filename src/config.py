@@ -5,6 +5,9 @@ HOST = '127.0.0.1'
 PORT = 5000
 DEBUG = True
 
+# configuração de destino
+DESTINATION_PORT = 5001
+
 # configurações de segurança
 KEY_SIZE = 2048
 PUBLIC_EXPONENT = 65537
