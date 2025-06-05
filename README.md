@@ -23,7 +23,9 @@ Uma aplicação de chat peer-to-peer baseada em Python, com mensagens em tempo r
 .
 ├── src/
 │   ├── security/
-│   │   └── crypto.py           # Lida com operações criptográficas (RSA, HMAC)
+│   │   ├── crypto.py           # Lida com operações criptográficas (RSA, HMAC)
+│   │   ├── rsa.py              # Realiza as operações de criptografia com chave assimétrica
+│   │   └── sha256.py           # Realiza as operações de hash
 │   ├── routes/
 │   │   ├── handshake_routes.py # Gerencia a lógica do handshake seguro
 │   │   └── message_routes.py   # Gerencia o envio e recebimento de mensagens
